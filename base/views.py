@@ -94,6 +94,7 @@ def room(request, pk):
             room=roomNum,
             body=request.POST.get('body')
         )
+        roomNum.participants.add(request.user)
         return redirect('room', pk=roomNum.id)
 
     context = {'room': roomNum, 'room_messages': room_messages, 'participants': participants}
@@ -143,3 +144,16 @@ def deleteRoom(request, pk):
         rooms.delete()
         return redirect('home')
     return render(request, 'chatTWS/delete.html', {'obj': rooms})
+
+
+@login_required(login_url='login')
+def deleteMessage(request, pk):
+    message = Message.objects.get(id=pk)
+
+    if request.user != message.user:
+        return HttpResponse('You are not allowed here!!')
+
+    if request.method == 'POST':
+        message.delete()
+        return redirect('home')
+    return render(request, 'chatTWS/delete.html', {'obj': message})
