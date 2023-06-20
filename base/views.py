@@ -103,6 +103,16 @@ def room(request, pk):
     return render(request, 'chatTWS/room.html', context)
 
 
+def userProfile(request, pk):
+    user = User.objects.get(id=pk)
+    rooms = user.room_set.all()
+    room_messages = user.message_set.all()
+    topics = Topic.objects.all()
+    context = {'user': user, 'rooms': rooms,
+               'room_messages': room_messages, 'topics': topics}
+    return render(request, 'chatTWS/profile.html', context)
+
+
 @login_required(login_url='login')
 def createRoom(request):
     form = RoomForm()
