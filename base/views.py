@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
 from .models import Room, Topic, Message
-from .forms import RoomForm
+from .forms import RoomForm, UserForm
 
 
 # Create your views here.
@@ -24,13 +24,12 @@ def loginPage(request):
         return redirect('home')
 
     if request.method == 'POST':
-        username = request.POST.get('username').lower()
+        username = request.POST.get('username')
         password = request.POST.get('password')
 
         try:
             user = User.objects.get(username=username, password=password)
-
-        except:
+        except :
             messages.error(request, 'User doses not exist.')
 
         user = authenticate(request, username=username, password=password)
@@ -178,3 +177,17 @@ def deleteMessage(request, pk):
         message.delete()
         return redirect('home')
     return render(request, 'chatTWS/delete.html', {'obj': message})
+
+
+@login_required(login_url='login')
+def updateUser(request):
+    user = request.user
+    form = UserForm(instance=user)
+
+    if request.method == 'POST':
+        form = UserForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('user-profile', pk=user.id)
+
+    return render(request, 'chatTWS/update-user.html', {'form': form})
